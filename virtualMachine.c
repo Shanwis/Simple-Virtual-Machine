@@ -2,7 +2,7 @@
 #include<stdbool.h>
 
 #define STACK_SIZE 256
-static int stack[STACK_SIZE];
+#define PROGRAM_SIZE 256
 
 typedef enum {
     PSH,
@@ -17,8 +17,25 @@ typedef enum {
     NUM_OF_REGISTERS
 } Registers;
 
-int registers[NUM_OF_REGISTERS] = {[IP] = 0, [SP] = -1};
-bool running = true;
+typedef struct {
+    int stack[STACK_SIZE];
+    int registers[NUM_OF_REGISTERS];
+    int program[PROGRAM_SIZE];
+    bool running;
+} VM;
+
+void init_vm(VM *vm, const int *program, int program_size){
+    for(int i=0;i<NUM_OF_REGISTERS;i++){
+        vm->registers[i] = 0;
+    }
+    vm->registers[SP] = -1;
+
+    for(int i=0; i<program_size; i++){
+        vm->program[i] = program[i];
+    }
+
+    vm->running = true;
+}
 
 const int program[] = {
     PSH, 5,
@@ -28,70 +45,70 @@ const int program[] = {
     HLT
 };
 
-int fetch() {
-    return program[registers[IP]++];
+int fetch(VM *vm) {
+    return vm->program[vm->registers[IP]++];
 }
 
-bool underflow(){
-    if (registers[SP] < 0) {
+bool underflow(VM *vm){
+    if (vm->registers[SP] < 0) {
         printf("Stack underflow!\n");
-        running = false;
+        vm->running = false;
         return true;
     }
     return false;
 }
 
-bool overflow(){
-    if (registers[SP] >= 255) {
+bool overflow(VM *vm){
+    if (vm->registers[SP] >= 255) {
         printf("Stack overflow!\n");
-        running = false;
+        vm->running = false;
         return true;
     }
     return false;
 }
 
-bool validRegister(int reg){
+bool validRegister(VM *vm, int reg){
     if(reg < 0 || reg >= NUM_OF_REGISTERS){
         printf("Invalid register %d\n", reg);
-        running = false;
+        vm->running = false;
         return false;
     }
     return true;
 }
 
-void eval(int instr) {
+void eval(VM *vm, int instr) {
     switch (instr) {
         case HLT:{
-            running = false;
+            vm->running = false;
             break;
         }
         case PSH: {
-            if(overflow()) break;
-            stack[++registers[SP]] = fetch();
+            if(overflow(vm)) break;
+            vm->stack[++vm->registers[SP]] = fetch(vm);
             break;
         }
         case POP: {
-            if (underflow()) break;
-            printf("Popped %d\n",stack[registers[SP]--]);
+            if (underflow(vm)) break;
+            printf("Popped %d\n",vm->stack[vm->registers[SP]--]);
             break;
         }
         case ADD: {
-            if (registers[SP] < 1) {
+            if (vm->registers[SP] < 1) {
                 printf("Stack underflow on ADD!\n");
-                running = false;
+                vm->running = false;
                 break;
             }
-            int a = stack[registers[SP]--];
-            int b = stack[registers[SP]--];
+            int a = vm->stack[vm->registers[SP]--];
+            int b = vm->stack[vm->registers[SP]--];
 
             int result = b+a;
-            stack[++registers[SP]] = result;
+            vm->stack[++vm->registers[SP]] = result;
             break;
         }
         case SET: {
-            int reg = fetch();
-            int pos = fetch();
-            if(validRegister(reg)) registers[reg] = pos;
+            int reg = fetch(vm);
+            int pos = fetch(vm);
+            if(validRegister(vm, reg)) vm->registers[reg] = pos;
             break;
         }
         default:
@@ -99,9 +116,15 @@ void eval(int instr) {
     }
 };
 
-int main(){
-    while(running){
-        eval(fetch());
+void run(VM *vm){
+    while(vm->running){
+        eval(vm, fetch(vm));
     }
+}
+
+int main(){
+    VM vm1;
+    init_vm(&vm1, program, sizeof(program)/sizeof(program[0]));
+    run(&vm1);
     return 0;
 }
