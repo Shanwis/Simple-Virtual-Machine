@@ -1,8 +1,10 @@
-SRC = src/virtualMachine.c src/main.c
+SRC = src/virtualMachine.c src/main.c src/assembler.c
 CC = gcc
 CFLAG = -Iinclude
 OBJ = $(SRC:.c=.o)
 TARGET = virtualMachine
+
+FILE ?= program.asm
 
 .PHONY: all clean run
 
@@ -15,7 +17,7 @@ $(TARGET):$(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run:$(TRAGET)
-	./$(TARGET)
+	./$(TARGET) $(FILE)
 
 clean:
 	rm -f $(OBJ) $(TARGET)

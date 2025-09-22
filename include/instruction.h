@@ -11,7 +11,8 @@ typedef enum {
     ADD,
     POP,
     SET,
-    HLT
+    HLT,
+    NUM_OF_INSTRUCTIONS
 } InstructionSet;
 
 typedef enum {
@@ -22,8 +23,13 @@ typedef enum {
 typedef struct {
     int stack[STACK_SIZE];
     int registers[NUM_OF_REGISTERS];
-    int program[PROGRAM_SIZE];
+    int program[256];
     bool running;
 } VM;
+
+typedef struct{
+    const char *name;
+    int opcode;
+} InstructionMapping;
 
 #endif

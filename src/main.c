@@ -1,15 +1,13 @@
 #include "../include/virtualMachine.h"
+#include "../include/assembler.h"
 
-const int program[] = {
-    PSH, 6,
-    PSH, 6,
-    ADD,
-    POP,
-    HLT
-};
-
-
-int main(){
+int main(int argc,char *argv[]){
+    int program[PROGRAM_SIZE];
+    int size = assemble_file(argv[1], program);
+    if(size<0){
+        printf("Error reading the file");
+        return -1;
+    }
     VM vm1;
     init_vm(&vm1, program, sizeof(program)/sizeof(program[0]));
     run(&vm1);
