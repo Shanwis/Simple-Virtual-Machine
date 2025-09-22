@@ -1,6 +1,0 @@
-#object files
-*.o
-
-#executables
-*.out
-*.exe
