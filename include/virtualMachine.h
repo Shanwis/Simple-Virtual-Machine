@@ -1,6 +1,7 @@
 #ifndef VM_H
 #define VM_H
 
+#include<stdio.h>
 #include "instruction.h"
 
 void init_vm(VM *vm, const int *program, int program_size);

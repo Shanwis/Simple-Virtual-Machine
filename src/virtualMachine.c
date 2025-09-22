@@ -1,6 +1,4 @@
-#include<stdio.h>
-#include<stdbool.h>
-#include "virtualMachine.h"
+#include "../include/virtualMachine.h"
 
 void init_vm(VM *vm, const int *program, int program_size){
     for(int i=0;i<NUM_OF_REGISTERS;i++){
@@ -14,14 +12,6 @@ void init_vm(VM *vm, const int *program, int program_size){
 
     vm->running = true;
 }
-
-const int program[] = {
-    PSH, 5,
-    PSH, 6,
-    ADD,
-    POP,
-    HLT
-};
 
 int fetch(VM *vm) {
     return vm->program[vm->registers[IP]++];
@@ -98,11 +88,4 @@ void run(VM *vm){
     while(vm->running){
         eval(vm, fetch(vm));
     }
-}
-
-int main(){
-    VM vm1;
-    init_vm(&vm1, program, sizeof(program)/sizeof(program[0]));
-    run(&vm1);
-    return 0;
 }
